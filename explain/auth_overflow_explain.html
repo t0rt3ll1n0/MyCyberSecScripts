@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>auth_overflow explained</title>
+        <meta name="auth_overflow_explain.html">
+        <meta author="t0rt3ll1n0">
+        <!--No stylesheet-->
+    </head>
+    <body>
+        <h1>auth_overflow</h1>
+        <p>Nel file <b>auth_overflow.c</b> possiamo vedere un basico metodo di autenticazione</p>
+        <p>Proviamo ad compilarlo con GCC:</p>
+        <code>~$ gcc -o auth_overflow auth_overflow.c</code>
+        <p>E ad eseguirlo:</p>
+        <code>~$ ./auth_overflow</code>
+        <code>Usage: ./auth_overflow <password></code>
+        <p>Diamo un'occhiata al codice, alle righe 9 e 11 possiamo vedere le due password "brillig" e "outgrabe"</p>
+        <p>Quindi proviamo ad eseguirlo e diamogli come argomento "brilling o "outgrabe"</p>
+        <code>~$ ./auth_overflow outgrabe</code>
+        <br>
+        <code>[+] Access Granted [+]</code>
+        <br>
+        <code>~$ ./auth_overflow brillig</code>
+        <br>
+        <code>[+] Access Granted [+]</code>
+        <p>Se invece gli diamo una password errata come "password" ci nega l'accesso</p><!--Che originalità-->
+        <code>~$ ./auth_overflow password</code>
+        <br>
+        <code>[-] Access Denied [-]</code>
+        <p>E fino a qui il codice fà il suo lavoro senza problemi</p>
+        <p>Ma andiamo alle righe 7 e 8</p>
+            <code>char password_buffer[16];</code>
+            <p>In queste righe viene definita la variabile <b>password_buffer</b> con una lunghezza massima di 16 caratteri</p>
+            <code>strcpy(password_buffer, password);</code>
+            <p>In questa viene invocata la funzione <b>strcpy</b> che ha il compito di copiare una data stringa da un posto ad un altro</p>
+            <p>Normalmente il codice andrebbe senza problemi, ma che succede se come password mettiamo una stringa di 17 caratteri o più? Proviamo:</p>
+            <code>~$ ./auth_overflow AAAAAAAAAAAAAAAAA</code>
+            <br>
+            <code>[+] Access Granted [+]</code>
+            <p>Cos'è successo? Teoricamente avrebbe dovuto negarci l'accesso ma avendo inserito una stringa di 17 caratteri abbiamo creato una situazione imprevista (infatti abbiamo tentato di mettere una stringa di 17 caratteri in un buffer che ne poteva contenere al massimo 16) che ci ha garantito l'accesso, questa vulnerabilità è chiamata buffer overflow (BoF)</p>
+            <p>Ovviamente questo è un esempio molto basico che però ci fa capire la pericolosità di questa vulnerabilità</p>
+            <p>Conseguenze:</p>
+                <ul>
+                    <li>Crash del sistema (Internal DoS)</li>
+                    <li>Esecuzione di codice da remoto (RCE)</li>
+                    <p>Ovviamente ciò dipende da:</p>
+                     <ul>
+                         <li>Cosa c'è vicino al buffer</li>
+                         <li>quali dati vanno a sovrascrivere le aree di memoria adiacenti al buffer</li>
+                     </ul>
+                </ul>
+        <br>
+        <p>Link di approfondimento:</p>
+        <ul>
+            <li><a href="https://it.wikipedia.org/wiki/Buffer_overflow">BoF Wikipedia</a></li>
+            <li><a href="https://owasp.org/www-community/vulnerabilities/Buffer_Overflow">BoF OWASP</a></li>
+        </ul>
+        <a href="https://www.github.com/t0rt3ll1n0/MyCyberSecScripts">Torna alla branch master</a>
+    </body>
+</html>
